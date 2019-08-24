@@ -1,9 +1,9 @@
 import requests
-from bs4 import BeautifulSoup
 import traceback
 import re
 import pandas as pd
 import json
+import time
 
 
 def get_html_text(url, headers, code='utf-8'):
@@ -44,9 +44,10 @@ def get_comment_info(oid, pn, headers):
                 url = start_url.format(i)
                 data_json = get_html_text(url, headers)
                 # TODO  爬取进度条
-
+                print('\r当前进度：{:.2f}%'.format(i*100/pn), '[', '*'*int(i*50/pn),
+                      '-' * int(50 - i * 50 / pn), ']', end='')
                 # 整理数据
-                # TODO   爬取  评论点赞数  修改时间为时间轴
+                # TODO   爬取  修改时间为时间轴
                 data_list = json.loads(data_json)
                 comment_dict = data_list["data"]["replies"]
                 for j in range(0, 20):
@@ -56,7 +57,11 @@ def get_comment_info(oid, pn, headers):
                                  'vipType': comment_dict[j]['member']['vip']['vipType'],
                                  'vipDueDate': comment_dict[j]['member']['vip']['vipDueDate'],
                                  'ctime': comment_dict[j]['ctime'], 'rcount': comment_dict[j]['count'],
-                                 'message': comment_dict[j]['content']['message']}
+                                 'message': comment_dict[j]['content']['message'],
+                                 'like': comment_dict[j]['like']}
+                    timeTemp = dict_temp['ctime']
+                    timeArray = time.localtime(timeTemp)
+                    dict_temp['ctime'] = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
                     dict_comment.update({k: dict_temp})
                     k = k + 1
             except:
@@ -68,11 +73,11 @@ def get_comment_info(oid, pn, headers):
     # user_comment_data.index = range((i - 1) * 20 + 1, (i - 1) * 20 + len(user_comment_data) + 1)  # 为数据重新编号
 
     # 将数据重新转为json后存储
-    comment_data_json = user_comment_data.to_json(orient='index')
+    comment_data_json = user_comment_data.to_json(orient='index', force_ascii=False)
+    # path = xx
+    # data = pd.read_json(path, orient='index')
     with open('./data/total_comment.json', "w", encoding="utf-8") as file_data:
-        file_data.write('\n')
         file_data.write(comment_data_json)
-
     return user_comment_data
 
 
@@ -93,9 +98,8 @@ def main():
     count = re.findall(r'20,"count":\d+', pn1_html)[0][11:]
     pn = float(count) / 20
 
-    # 得到视频评论的json信息，并返回。
-    user_comment_data = get_comment_info(oid, 5, headers)  # int(pn)
-    a = user_comment_data
+    # 得到视频评论的DataFrame信息，并返回。
+    user_comment_data = get_comment_info(oid, 10, headers)  # int(pn)
 
 
 if __name__ == '__main__':

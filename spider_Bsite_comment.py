@@ -4,7 +4,8 @@ import re
 import pandas as pd
 import json
 import time
-
+import os
+from os import path
 
 def get_html_text(url, headers, code='utf-8'):
     '''
@@ -85,21 +86,35 @@ def get_comment_info(oid, pn, headers):
     return user_comment_data
 
 
-def save_commment_to_json(datadf, data_name, path='./data/'):
+def save_commment_to_json(datadf, data_name, data_path='./data/'):
     '''
     将数据datadf转为json文件后以data_name名称存储到path路径下
 
     :param datadf: 存储的文件（DataFrame）
     :param data_name:  数据名      ex: quanzhi_comment
-    :param path: 文件存储的路径    ex : ./data/
+    :param data_path: 文件存储的路径    ex : ./data/
     :return:
     '''
     # path = ./data/total_comment.json
+
     try:
-        path = path+data_name+'.json'
+        # 写入完整json数据
+        if not path.exists(data_path):
+            os.makedirs(data_path)
+        data_path = data_path + data_name + '.json'
         datadf_json = datadf.to_json(orient='index', force_ascii=False)
-        with open(path, "w", encoding="utf-8") as file_data:
+        with open(data_path, "w", encoding="utf-8") as file_data:
             file_data.write(datadf_json)
+
+        # 写入评论数据
+        data_path = './comment_data/'
+        if not path.exists(data_path):
+            os.makedirs(data_path)
+        data_path += data_name + '.txt'
+        with open(data_path, "w", encoding="utf-8") as file_data:
+            for i in datadf['message']:
+                file_data.write(i)
+                file_data.write('\n')
         return True
     except:
         traceback.print_exc()
@@ -119,8 +134,8 @@ def load_comment_from_json(data_name, path='./data/'):
 
 
 def main():
-    url = 'https://www.bilibili.com/bangumi/play/ep107656/'       # 全职高手
-    # url = 'https://www.bilibili.com/bangumi/play/ep277146/'       # 异常生物见闻录
+    # url = 'https://www.bilibili.com/bangumi/play/ep107656/'       # 全职高手
+    url = 'https://www.bilibili.com/bangumi/play/ep277146/'       # 异常生物见闻录
     # url = 'https://www.bilibili.com/video/av13967569'
     # url = 'https://www.bilibili.com/bangumi/play/ss28296'           # 哈利波特
     # url = 'https://www.bilibili.com/bangumi/play/ss12717/'          # 扫毒
@@ -144,7 +159,7 @@ def main():
         pn = float(count) / 20
         print(pn)
         # 得到视频评论的DataFrame信息，并返回。
-        user_comment_data = get_comment_info(oid, 500, headers)  # int(pn)
+        user_comment_data = get_comment_info(oid, int(pn), headers)  # int(pn)
         save_commment_to_json(user_comment_data, AV_name)
     except:
         traceback.print_exc()

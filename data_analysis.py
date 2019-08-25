@@ -15,16 +15,30 @@ plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
 plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 
 
-def load_comment_from_json(data_name, path='./data/'):
+def load_comment_from_json(data_name, data_path='./data/'):
     '''
     加载json评论数据，并且以DataFrame的数据结构返回
+    :param data_path:
     :param data_name:
-    :param path:
     :return:
     '''
-    path = path + data_name + '.json'
-    data = pd.read_json(path, orient='index', encoding='utf-8')
-    return data
+    try:
+        # 获取用户+评论数据
+        user_data_path = data_path + data_name + '.json'
+        datadf = pd.read_json(user_data_path, orient='index', encoding='utf-8')
+    except:
+        print('加载用户+评论数据失败')
+        return 0, 0
+    try:
+        # 获取评论数据
+        comment_data_path = data_path + 'comment_data/' + data_name + '.txt'
+        with open(comment_data_path, 'r', encoding='utf-8') as f:
+            text = f.read()
+    except:
+        print('加载评论数据失败')
+        return 0, 0
+
+    return datadf, text
 
 
 def level_pie(datadf):
@@ -79,6 +93,7 @@ def member_pie(datadf):
     plt.title('Member Analysis')
     plt.savefig("./data_analysis/Member_pie.jpg", dpi=600)
     plt.show()
+    print('会员分析饼图已保存：./data_analysis/Member_pie.jpg')
 
 
 def gender_pie(datadf):
@@ -115,6 +130,7 @@ def gender_pie(datadf):
     plt.title('Gender Analysis')
     plt.savefig("./data_analysis/Gender_pie.jpg", dpi=600)
     plt.show()
+    print('性别分析饼图已保存：./data_analysis/Gender_pie.jpg')
 
 
 def ctime_analysis_based_day(datadf):
@@ -143,7 +159,9 @@ def ctime_analysis_based_day(datadf):
     ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_spacing))
 
     ax.set_title("Comment Time Analysis Based Day")
+    plt.savefig("./data_analysis/CTime(day)_line_chart.jpg", dpi=600)
     plt.show()
+    print('评论时间(day)分析折线图已保存：./data_analysis/CTime(day)_line_chart.jpg')
 
 
 def ctime_analysis_based_hour(datadf):
@@ -167,7 +185,9 @@ def ctime_analysis_based_hour(datadf):
     ax.set_title("Comment Time Analysis Based Time")
     ytick_spacing = 100
     ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_spacing))
+    plt.savefig("./data_analysis/CTime(hour)_line_chart.jpg", dpi=600)
     plt.show()
+    print('评论时间(hour)分析折线图已保存：./data_analysis/CTime(hour)_line_chart.jpg')
 
 
 def stopword_cut(deal_text, stoplist):
@@ -184,23 +204,15 @@ def stopword_cut(deal_text, stoplist):
     return text
 
 
-def comment_analysis(data_name, datadf):
+def comment_analysis(data_name, text):
     '''
     评论数据 词云分析
-    :param datadf:
+    :param data_name:
+    :param text
     :return:
     '''
-    # 检查该评论数据文件夹是否存在
-    data_path = './data/comment_data/'
-    if not path.exists(data_path):
-        os.makedirs(data_path)
-        print('data not exist')
-        return
-    # TODO 如果不存在提醒先去爬数据
-
     # 开始词云分析
-    with open(data_path+data_name+'.txt', 'r', encoding='utf-8') as f:
-        text = f.read()
+
     dict_path = './data/dict/worddict.txt'
     stopword_path = './data/dict/stopwords.txt'
 
@@ -221,20 +233,40 @@ def comment_analysis(data_name, datadf):
     plt.axis('off')  # 关闭坐标轴
     plt.savefig('./data_analysis/wordcloud_' + data_name + '.jpg', dpi=600)
     plt.show()
+    print('评论词云图已保存：./data_analysis/wordcloud_' + data_name + '.jpg')
 
 
-def main():
-    data_name = '哈利·波特与密室_电影_bilibili_哔哩哔哩'
+def main_data_analysis(data_name=''):
+    '''
+    数据分析主函数，
+    :param data_name:
+    :return:
+    '''
+    # 数据加载
+    # data_name = '哈利·波特与密室_电影_bilibili_哔哩哔哩'
     # data_name = '全职高手 第一季'
-    datadf = load_comment_from_json(data_name)
+    # data_name = '女高中生的虚度日常_番剧_bilibili_哔哩哔哩'
+    # data_name = '某科学的超电磁炮S'
+    try:
+        text = ''
+        datadf, text = load_comment_from_json(data_name)
+    except:
+        print('500：评论数据读取失败')
+    try:
+        # 制作饼图
+        gender_pie(datadf)
+        member_pie(datadf)
+        level_pie(datadf)
 
-    gender_pie(datadf)
-    member_pie(datadf)
-    level_pie(datadf)
-    ctime_analysis_based_day(datadf)
-    ctime_analysis_based_hour(datadf)
-    comment_analysis(data_name, datadf)
+        # 制作折线图
+        ctime_analysis_based_day(datadf)
+        ctime_analysis_based_hour(datadf)
+
+        # 评论词云分析
+        comment_analysis(data_name, text)
+    except:
+        print('600：数据分析失败')
 
 
 if __name__ == '__main__':
-    main()
+    main_data_analysis()

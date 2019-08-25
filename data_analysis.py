@@ -3,6 +3,12 @@ import json
 import traceback
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from wordcloud import WordCloud
+import os
+from os import path
+import jieba
+from PIL import Image
+import numpy as np
 
 
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
@@ -133,7 +139,7 @@ def ctime_analysis_based_day(datadf):
 
     xtick_spacing = int(length/13) + 1
     ax.xaxis.set_major_locator(ticker.MultipleLocator(xtick_spacing))
-    ytick_spacing = int(round(max(data_dict.values())/150)*10)
+    ytick_spacing = int(round(max(data_dict.values())/150)*10)+10
     ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_spacing))
 
     ax.set_title("Comment Time Analysis Based Day")
@@ -164,9 +170,62 @@ def ctime_analysis_based_hour(datadf):
     plt.show()
 
 
+def stopword_cut(deal_text, stoplist):
+    '''
+    根据暂停词列表去掉原文本中的暂停词,返回处理后的text
+    :param deal_text:
+    :param stoplist:
+    :return:
+    '''
+    text = []
+    for i in jieba.cut(deal_text):
+        if i not in stoplist and len(i) > 1:
+            text.append(i)
+    return text
+
+
+def comment_analysis(data_name, datadf):
+    '''
+    评论数据 词云分析
+    :param datadf:
+    :return:
+    '''
+    # 检查该评论数据文件夹是否存在
+    data_path = './data/comment_data/'
+    if not path.exists(data_path):
+        os.makedirs(data_path)
+        print('data not exist')
+        return
+    # TODO 如果不存在提醒先去爬数据
+
+    # 开始词云分析
+    with open(data_path+data_name+'.txt', 'r', encoding='utf-8') as f:
+        text = f.read()
+    dict_path = './data/dict/worddict.txt'
+    stopword_path = './data/dict/stopwords.txt'
+
+    jieba.load_userdict(dict_path)      # 加载用户自定义字典
+    with open(stopword_path, 'r', encoding='utf-8') as f:   # 加载用户自定义的暂停词
+        stoptext = f.read()
+    stoplist = stoptext.rsplit(sep="\n")
+    text = stopword_cut(text, stoplist)         # 根据暂停词来去掉没用的数据
+    text = ' '.join(text)   # 将list变为字符串
+    # # 设置云图的遮蔽图片
+    # mask_img_path = './data/image/' + data_name + '.png'
+    # mask_img = np.array(Image.open(mask_img_path))
+    word = WordCloud(font_path="C:\\Windows\\Fonts\\STFANGSO.ttf", max_words=200, min_font_size=10, scale=3,
+                     background_color='white')
+    word.generate(text)
+    # word.to_file('./data_analysis/wordcloud_'+data_name+'.jpg')
+    plt.imshow(word, interpolation='bilinear')
+    plt.axis('off')  # 关闭坐标轴
+    plt.show()
+    plt.savefig('./data_analysis/wordcloud_' + data_name + '.jpg', dpi=600)
+
+
 def main():
-    # data_name = '哈利·波特与密室_电影_bilibili_哔哩哔哩'
-    data_name = '全职高手 第一季'
+    data_name = '哈利·波特与密室_电影_bilibili_哔哩哔哩'
+    # data_name = '全职高手 第一季'
     datadf = load_comment_from_json(data_name)
 
     gender_pie(datadf)
@@ -174,6 +233,7 @@ def main():
     level_pie(datadf)
     ctime_analysis_based_day(datadf)
     ctime_analysis_based_hour(datadf)
+    comment_analysis(data_name, datadf)
 
 
 if __name__ == '__main__':

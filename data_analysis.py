@@ -213,14 +213,14 @@ def comment_analysis(data_name, datadf):
     # # 设置云图的遮蔽图片
     # mask_img_path = './data/image/' + data_name + '.png'
     # mask_img = np.array(Image.open(mask_img_path))
-    word = WordCloud(font_path="C:\\Windows\\Fonts\\STFANGSO.ttf", max_words=200, min_font_size=10, scale=3,
+    word = WordCloud(font_path="C:\\Windows\\Fonts\\STFANGSO.ttf", max_words=200, min_font_size=7, scale=2,
                      background_color='white')
     word.generate(text)
     # word.to_file('./data_analysis/wordcloud_'+data_name+'.jpg')
     plt.imshow(word, interpolation='bilinear')
     plt.axis('off')  # 关闭坐标轴
-    plt.show()
     plt.savefig('./data_analysis/wordcloud_' + data_name + '.jpg', dpi=600)
+    plt.show()
 
 
 def main():

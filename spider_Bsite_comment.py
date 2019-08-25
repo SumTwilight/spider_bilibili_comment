@@ -48,8 +48,8 @@ def get_comment_info(oid, pn, headers):
                 print('\r当前进度：{:.2f}%'.format(i*100/pn), '[', '*'*int(i*50/pn),
                       '-' * int(50 - i * 50 / pn), ']', end='')
                 # 整理数据
-                data_list = json.loads(data_json)
-                comment_dict = data_list["data"]["replies"]
+                data_dict = json.loads(data_json)
+                comment_dict = data_dict["data"]["replies"]
                 for j in range(0, 20):
                     dict_temp = {'mid': comment_dict[j]['mid'], 'uname': comment_dict[j]['member']['uname'],
                                  'sex': comment_dict[j]['member']['sex'], 'sign': comment_dict[j]['member']['sign'],
@@ -62,7 +62,11 @@ def get_comment_info(oid, pn, headers):
                     # 修改时间戳 为 具体时间
                     timeTemp = dict_temp['ctime']
                     timeArray = time.localtime(timeTemp)
-                    dict_temp['ctime'] = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+                    dict_temp['ctime'] = time.strftime("%Y-%m-%d", timeArray)
+                    dict_temp['ctime_time'] = time.strftime("%H:%M:%S", timeArray)
+                    timeTemp = int(dict_temp['vipDueDate']/1000)
+                    timeArray = time.localtime(timeTemp)
+                    dict_temp['vipDueDate'] = time.strftime("%Y-%m-%d", timeArray)
                     # 将数据存入主字典
                     dict_comment.update({k: dict_temp})
                     k = k + 1  # 为数据编号
@@ -110,16 +114,16 @@ def load_comment_from_json(data_name, path='./data/'):
     :return:
     '''
     path = path+data_name+'.json'
-    data = pd.read_json(path, orient='index')
+    data = pd.read_json(path, orient='index', encoding='utf-8')
     return data
 
 
 def main():
-    # url = 'https://www.bilibili.com/bangumi/play/ep107656/'       # 全职高手
+    url = 'https://www.bilibili.com/bangumi/play/ep107656/'       # 全职高手
     # url = 'https://www.bilibili.com/bangumi/play/ep277146/'       # 异常生物见闻录
     # url = 'https://www.bilibili.com/video/av13967569'
     # url = 'https://www.bilibili.com/bangumi/play/ss28296'           # 哈利波特
-    url = 'https://www.bilibili.com/bangumi/play/ss12717/'
+    # url = 'https://www.bilibili.com/bangumi/play/ss12717/'          # 扫毒
     headers = {
         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -138,9 +142,9 @@ def main():
         pn1_html = get_html_text(pn1_url, headers)
         count = re.findall(r'20,"count":\d+', pn1_html)[0][11:]
         pn = float(count) / 20
-
+        print(pn)
         # 得到视频评论的DataFrame信息，并返回。
-        user_comment_data = get_comment_info(oid, 10, headers)  # int(pn)
+        user_comment_data = get_comment_info(oid, 500, headers)  # int(pn)
         save_commment_to_json(user_comment_data, AV_name)
     except:
         traceback.print_exc()

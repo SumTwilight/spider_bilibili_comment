@@ -36,3 +36,5 @@ ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_spacing))
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
 plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 ```
+
+- 只能爬取动漫和电影的数据

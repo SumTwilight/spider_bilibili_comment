@@ -12,7 +12,8 @@ FAILED_SPIDER = 0   # TODO 等待自己定义一个常量类
 FAILED_SAVING = -1
 OVERFLOW_ERROR = -2
 
-class CrawIThread(QThread):
+
+class SpiderThread(QThread):
     finished_signal = pyqtSignal()
     log_signal = pyqtSignal(str)
     result_signal = pyqtSignal(dict)
@@ -33,7 +34,7 @@ class CrawIThread(QThread):
     }
 
     def __init__(self):
-        super(CrawIThread, self).__init__()
+        super(SpiderThread, self).__init__()
 
     def get_html_text(self, URL, code='utf-8'):
         '''

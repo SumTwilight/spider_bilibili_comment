@@ -13,6 +13,8 @@ import numpy as np
 
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
 plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
+datadf = pd.DataFrame()
+text = ''
 
 
 def load_comment_from_json(data_name, data_path='./data/'):
@@ -27,8 +29,13 @@ def load_comment_from_json(data_name, data_path='./data/'):
         user_data_path = data_path + data_name + '.json'
         datadf = pd.read_json(user_data_path, orient='index', encoding='utf-8')
     except:
-        print('加载用户+评论数据失败')
-        return 0, 0
+        # traceback.print_exc()
+        print('加载用户评论数据失败')
+        return 0
+    return datadf
+
+
+def load_comment_data(data_name, data_path='./data/'):
     try:
         # 获取评论数据
         comment_data_path = data_path + 'comment_data/' + data_name + '.txt'
@@ -37,13 +44,13 @@ def load_comment_from_json(data_name, data_path='./data/'):
     except:
         print('加载评论数据失败')
         return 0, 0
+    return text
 
-    return datadf, text
 
-
-def level_pie(datadf):
+def level_pie(data_name, datadf):
     '''
         输出用户等级的饼图
+        :param data_name:
         :param datadf:
         :return:
     '''
@@ -65,13 +72,14 @@ def level_pie(datadf):
     plt.axis('equal')  # 让图像保持圆形
     plt.legend(loc="upper right", fontsize=13, bbox_to_anchor=(1.1, 1.05), borderaxespad=0.3)
     plt.title('Level Analysis')
-    plt.savefig("./data_analysis/level_pie.jpg", dpi=600)
+    plt.savefig("./data_analysis/level_pie" + data_name + ".jpg", dpi=600)
     plt.show()
 
 
-def member_pie(datadf):
+def member_pie(data_name, datadf):
     '''
         输出会员构成的饼图
+        :param data_name:
         :param datadf:
         :return:
     '''
@@ -93,12 +101,13 @@ def member_pie(datadf):
     plt.title('Member Analysis')
     plt.savefig("./data_analysis/Member_pie.jpg", dpi=600)
     plt.show()
-    print('会员分析饼图已保存：./data_analysis/Member_pie.jpg')
+    print('会员分析饼图已保存：./data_analysis/Member_pie' + data_name + '.jpg')
 
 
-def gender_pie(datadf):
+def gender_pie(data_name, datadf):
     '''
     输出男女性别的饼图
+    :param data_name:
     :param datadf:
     :return:
     '''
@@ -130,12 +139,13 @@ def gender_pie(datadf):
     plt.title('Gender Analysis')
     plt.savefig("./data_analysis/Gender_pie.jpg", dpi=600)
     plt.show()
-    print('性别分析饼图已保存：./data_analysis/Gender_pie.jpg')
+    print('性别分析饼图已保存：./data_analysis/Gender_pie' + data_name + '.jpg')
 
 
-def ctime_analysis_based_day(datadf):
+def ctime_analysis_based_day(data_name, datadf):
     '''
     输出以日为单位的评论数的折线图
+    :param data_name:
     :param datadf:
     :return:
     '''
@@ -161,12 +171,13 @@ def ctime_analysis_based_day(datadf):
     ax.set_title("Comment Time Analysis Based Day")
     plt.savefig("./data_analysis/CTime(day)_line_chart.jpg", dpi=600)
     plt.show()
-    print('评论时间(day)分析折线图已保存：./data_analysis/CTime(day)_line_chart.jpg')
+    print('评论时间(day)分析折线图已保存：./data_analysis/CTime(day)_line_chart' + data_name + '.jpg')
 
 
-def ctime_analysis_based_hour(datadf):
+def ctime_analysis_based_hour(data_name, datadf):
     '''
     输出以小时为单位的评论数的折线图
+    :param data_name:
     :param datadf:
     :return:
     '''
@@ -187,7 +198,7 @@ def ctime_analysis_based_hour(datadf):
     ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_spacing))
     plt.savefig("./data_analysis/CTime(hour)_line_chart.jpg", dpi=600)
     plt.show()
-    print('评论时间(hour)分析折线图已保存：./data_analysis/CTime(hour)_line_chart.jpg')
+    print('评论时间(hour)分析折线图已保存：./data_analysis/CTime(hour)_line_chart' + data_name + '.jpg')
 
 
 def stopword_cut(deal_text, stoplist):
@@ -204,7 +215,7 @@ def stopword_cut(deal_text, stoplist):
     return text
 
 
-def comment_analysis(data_name, text):
+def wordcloud_comment(data_name, text):
     '''
     评论数据 词云分析
     :param data_name:
@@ -228,12 +239,22 @@ def comment_analysis(data_name, text):
     word = WordCloud(font_path="C:\\Windows\\Fonts\\STFANGSO.ttf", max_words=200, min_font_size=7, scale=2,
                      background_color='white')
     word.generate(text)
-    # word.to_file('./data_analysis/wordcloud_'+data_name+'.jpg')
     plt.imshow(word, interpolation='bilinear')
     plt.axis('off')  # 关闭坐标轴
     plt.savefig('./data_analysis/wordcloud_' + data_name + '.jpg', dpi=600)
     plt.show()
     print('评论词云图已保存：./data_analysis/wordcloud_' + data_name + '.jpg')
+
+
+# GUI界面调用
+def load_data(data_name):
+    global datadf, text
+    try:
+        datadf = load_comment_from_json(data_name)
+        text = load_comment_data(data_name)
+    except:
+        print('500：评论数据读取失败')
+    pass
 
 
 def main_data_analysis(data_name=''):
@@ -247,9 +268,10 @@ def main_data_analysis(data_name=''):
     # data_name = '全职高手 第一季'
     # data_name = '女高中生的虚度日常_番剧_bilibili_哔哩哔哩'
     # data_name = '某科学的超电磁炮S'
+    global datadf, text
     try:
-        text = ''
-        datadf, text = load_comment_from_json(data_name)
+        datadf = load_comment_from_json(data_name)
+        text = load_comment_data(data_name)
     except:
         print('500：评论数据读取失败')
     try:
@@ -263,7 +285,7 @@ def main_data_analysis(data_name=''):
         ctime_analysis_based_hour(datadf)
 
         # 评论词云分析
-        comment_analysis(data_name, text)
+        wordcloud_comment(data_name, text)
     except:
         print('600：数据分析失败')
 

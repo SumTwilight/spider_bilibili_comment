@@ -170,9 +170,9 @@ def ctime_analysis_based_hour(datadf):
     :param datadf:
     :return:
     '''
-    data_dict = {'00': 0, '23': 0, '22': 0, '21': 0, '20': 0, '19': 0, '18': 0, '17': 0, '16': 0, '15': 0, '14': 0,
-                 '13': 0, '12': 0, '11': 0, '10': 0, '09': 0, '08': 0, '07': 0, '06': 0, '05': 0, '04': 0, '03': 0,
-                 '02': 0, '01': 0}
+    data_dict = {'05': 0, '04': 0, '03': 0, '02': 0, '01': 0, '00': 0, '23': 0, '22': 0,
+                 '21': 0, '20': 0, '19': 0, '18': 0, '17': 0, '16': 0, '15': 0, '14': 0,
+                 '13': 0, '12': 0, '11': 0, '10': 0, '09': 0, '08': 0, '07': 0, '06': 0}
     for i in datadf['ctime_time'].values:
         k = i.astype(str)[11:13]
         if k in data_dict.keys():
@@ -182,8 +182,8 @@ def ctime_analysis_based_hour(datadf):
     ax = plt.subplot(111)
     ax.plot(data_dict.keys(), data_dict.values())
     # TODO 修改曲线的颜色类型
-    ax.set_title("Comment Time Analysis Based Time")
-    ytick_spacing = 100
+    ax.set_title("Comment Time Analysis Based Hour")
+    ytick_spacing = int(round(max(data_dict.values())/150)*10)+10
     ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_spacing))
     plt.savefig("./data_analysis/CTime(hour)_line_chart.jpg", dpi=600)
     plt.show()

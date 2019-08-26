@@ -10,42 +10,54 @@ from PyQt5.QtCore import QThread, pyqtSignal
 
 FAILED_SPIDER = 0   # TODO 等待自己定义一个常量类
 FAILED_SAVING = -1
-
+OVERFLOW_ERROR = -2
 
 class CrawIThread(QThread):
     finished_signal = pyqtSignal()
     log_signal = pyqtSignal(str)
     result_signal = pyqtSignal(dict)
     progressbar_signal = pyqtSignal(int, int)
+    error_signal = pyqtSignal(int)
+
+    # html info
+    URL = ''
+    oid = ''
+    Av_name = ''
+    spider_pn = 0
+    count_pn = 0
+    img = ''
+    headers = {
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/68.0.3440.106 Safari/537.36',
+    }
 
     def __init__(self):
         super(CrawIThread, self).__init__()
 
-    def get_html_text(self, URL, headers, code='utf-8'):
+    def get_html_text(self, URL, code='utf-8'):
         '''
         通过指定url链接获取html页面，编码方法默认为utf-8。有简单的错误处理，但不会提示。
 
         :param URL: 指定URL
-        :param headers:头
         :param code: 默认为'utf-8'
         :return: 返回相应的html页面信息
         '''
         try:
-            r = requests.get(URL, headers, timeout=30)
+            r = requests.get(URL, self.headers, timeout=30)
             r.raise_for_status()
             r.encoding = code
             return r.text
         except:
-            # traceback.print_exc()
-            self.log_signal.emit("获取html页面失败", r.raise_for_status())
+            traceback.print_exc()
+            self.log_signal.emit("获取html页面失败")
             return FAILED_SPIDER
 
-    def get_comment_info(self, oid, pn, headers):
+    def get_comment_info(self, oid, pn):
         '''
         核心函数，爬取用户评论及相关数据并整理，使用DataFrame数据类型返回最终数据
         :param oid:视频id
         :param pn:评论页数
-        :param headers:requests 头
         :return:
         '''
         start_url = 'https://api.bilibili.com/x/v2/reply?type=1&pn={}&oid=' + oid
@@ -57,7 +69,7 @@ class CrawIThread(QThread):
                 try:
                     # 爬取数据
                     URL = start_url.format(i)
-                    data_json = self.get_html_text(URL, headers)
+                    data_json = self.get_html_text(URL)
                     # 爬取进度条
                     # print('\r当前进度：{:.2f}%'.format(i * 100 / pn), '[', '*' * int(i * 50 / pn),
                     #       '-' * int(50 - i * 50 / pn), ']', end='')
@@ -98,13 +110,8 @@ class CrawIThread(QThread):
         # self.log_signal.emit('\r当前进度：{:.2f}%'.format(100) + '[' + '*' * 50 + ']')
         self.progressbar_signal.emit(pn, pn)
 
-        # print('爬取完成，保存数据中.....')
-        self.log_signal.emit('爬取完成，保存数据中.....')
         # 将整理后的将数据放入DataFrame中
         user_comment_data = pd.DataFrame(dict_comment).T  # 转置一下
-        # user_comment_data.index = range((i - 1) * 20 + 1, (i - 1) * 20 + len(user_comment_data) + 1)  # 为数据重新编号
-
-        # data = pd.read_json(path, orient='index')
         return user_comment_data
 
     def save_commment_to_json(self, datadf, data_name, img, data_path='./data/'):
@@ -119,6 +126,7 @@ class CrawIThread(QThread):
         :return:
         '''
         # path = ./data/total_comment.json
+        self.log_signal.emit('爬取完成，保存数据中.....')
         try:
             # 写入完整json数据
             if not path.exists(data_path):
@@ -186,78 +194,77 @@ class CrawIThread(QThread):
         data = pd.read_json(data_path, orient='index', encoding='utf-8')
         return data
 
-    def main_spider(self, URL):
-        '''
-
-        :param URL:
-        :return:
-        '''
-        headers = {
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/68.0.3440.106 Safari/537.36',
-        }
+    def get_av_info(self):
         try:
-            start_html = self.get_html_text(URL, headers)
+            start_html = self.get_html_text(self.URL, self.headers)
             # with open('./start.html', 'w', encoding='utf-8') as f:
             #     f.write(start_html)
         except:
             traceback.print_exc()
             self.log_signal.emit('100：初始页面爬取失败，请换一个视频链接')
             return FAILED_SPIDER
-
         try:
             # 得到视频AV(oid)号
-            oid = re.findall(r'av\d+|正片".{1,120}"aid":\d+', start_html)[0]
-            oid = re.findall(r'av\d+|"aid":\d+', oid)[0]
-            oid = re.findall(r'\d+', oid)[0]
+            self.oid = re.findall(r'av\d+|正片".{1,120}"aid":\d+', start_html)[0]
+            self.oid = re.findall(r'av\d+|"aid":\d+', self.oid)[0]
+            self.oid = re.findall(r'\d+', self.oid)[0]
             # 得到视频的Name
-            AV_name = re.findall(r'<title>[\u4e00-\u9fa5|\d| |\w|·]+', start_html)[0][7:]
+            self.Av_name = re.findall(r'<title>[\u4e00-\u9fa5|\d| |\w|·]+', start_html)[0][7:]
+            self.log_signal.emit('视频名称：' + self.Av_name)
             # 得到视频的图片
-            img = re.findall(r'og:image".+g">', start_html)[0]
-            img = re.findall(r'https.+g', img)[0]
-            img = requests.get(img).content
+            self.img = re.findall(r'og:image".+g">', start_html)[0]
+            self.img = re.findall(r'https.+g', self.img)[0]
+            self.img = requests.get(self.img).content     # TODO 图片暂时还没用
             # 得到视频评论总页数pn
-            pn1_url = 'https://api.bilibili.com/x/v2/reply?type=1&pn=1&oid=' + oid
-            pn1_html = self.get_html_text(pn1_url, headers)
+            pn1_url = 'https://api.bilibili.com/x/v2/reply?type=1&pn=1&oid=' + self.oid
+            pn1_html = self.get_html_text(pn1_url)
             count = re.findall(r'20,"count":\d+', pn1_html)[0][11:]
             pn = int(float(count) / 20)
+            self.count_pn = pn
+            self.log_signal.emit('评论总页数：' + str(pn) + '\n请输入爬取页数：')
         except:
-            # traceback.print_exc()
+            traceback.print_exc()
             self.log_signal.emit('200：获取视频信息失败')
             return FAILED_SPIDER
+        pass
 
+    def main_spider(self):
+        '''
+        :param URL:
+        :return:
+        '''
         try:
-            print(AV_name + '一共有：' + str(pn) + '页评论。')
-            pn = int(input('请输入爬取页数：'))
-            # 得到视频评论的DataFrame信息，并返回。
-            user_comment_data = self.get_comment_info(oid, int(pn), headers)  # int(pn)
+            if int(self.spider_pn) <= int(self.count_pn):
+                user_comment_data = self.get_comment_info(self.oid, int(self.spider_pn))  # int(pn)
+            else:
+                error_signal.emit(1)        # 页数上溢
+                return OVERFLOW_ERROR
         except:
-            # traceback.print_exc()
+            traceback.print_exc()
             self.log_signal.emit('300：获取评论数据失败')
             return FAILED_SPIDER
 
         try:
-            self.save_commment_to_json(user_comment_data, AV_name, img)
+            self.save_commment_to_json(user_comment_data, self.Av_name, self.img)
         except:
             # traceback.print_exc()
             self.log_signal.emit('400：保存爬取数据失败')
             return FAILED_SAVING
-        return AV_name
+        return True
 
     def run(self):
-        URL = input('请输入url')
-        Av_name = self.main_spider(URL)
+        flag = self.main_spider()
 
-        if Av_name == FAILED_SPIDER:    # 在log中打印 爬虫失败
+        if flag == FAILED_SPIDER:    # 在log中打印 爬虫失败
             self.log_signal.emit('状态码返回错误：爬虫失败')
-        elif Av_name == FAILED_SAVING:  # 在log中打印 保存失败
+        elif flag == FAILED_SAVING:  # 在log中打印 保存失败
             self.log_signal.emit('状态码返回错误：保存失败')
+        elif flag == OVERFLOW_ERROR:
+            pass
         else:
             self.finished_signal.emit()
-            self.log_signal.emit('视频名称：'+str(Av_name)+'\n爬取成功')      # 在log中打印 爬虫成功
+            self.log_signal.emit('视频名称：'+str(self.Av_name)+'\n爬取成功')      # 在log中打印 爬虫成功
 
 
 if __name__ == '__main__':
-    url = 'Waiting For Input'
-    main_spider(url)
+    pass

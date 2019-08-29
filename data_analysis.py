@@ -37,6 +37,9 @@ def load_comment_from_json(data_name, data_path='./data/'):
     except:
         print('加载评论数据失败')
         return 0, 0
+    save_path = './data_analysis/'
+    if not path.exists(save_path):
+            os.makedirs(save_path)
 
     return datadf, text
 
@@ -265,6 +268,7 @@ def main_data_analysis(data_name=''):
         # 评论词云分析
         comment_analysis(data_name, text)
     except:
+        traceback.print_exc()
         print('600：数据分析失败')
 
 

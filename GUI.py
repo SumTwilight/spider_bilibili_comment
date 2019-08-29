@@ -1,5 +1,9 @@
 import os
 import sys
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+import matplotlib.pyplot as plt
+
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QComboBox, QTextBrowser, QTableWidget, QInputDialog, \
                             QTableWidgetItem, QHeaderView, QProgressBar, QHBoxLayout, QVBoxLayout, QLineEdit
@@ -12,7 +16,7 @@ class CrawIWindow(QWidget):
     # 添加控件
     def __init__(self):
         super(CrawIWindow, self).__init__()
-        self.resize(800, 600)
+        self.resize(1000, 1600)
         self.setWindowTitle('这里是标题')
         self.setWindowIcon(QIcon('./data/image/全职高手 第一季.jpg'))      # 设置窗口图标
 
@@ -27,6 +31,10 @@ class CrawIWindow(QWidget):
         self.table = QTableWidget(self)
         self.log_browser = QTextBrowser(self)
         self.progressbar = QProgressBar(self)
+
+        # self.figure = plt.figure(facecolor='#FFD7C4')
+        # self.canves = FigureCanvas(self.figure)
+
         # 数据分析按钮
         self.start_data_analysis_btn = QPushButton()
         self.gender_pie_btn = QPushButton()
@@ -142,6 +150,7 @@ class CrawIWindow(QWidget):
         self.v_layout.addLayout(self.h_layout)
         self.v_layout.addWidget(self.start_data_analysis_btn)
         self.v_layout.addLayout(self.da_layout)
+        # self.v_layout.addWidget(self.canves)
 
         self.setLayout(self.v_layout)
 

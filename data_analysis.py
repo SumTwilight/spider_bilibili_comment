@@ -18,12 +18,12 @@ text = ''
 
 
 def load_comment_from_json(data_name, data_path='./data/'):
-    '''
+    """
     加载json评论数据，并且以DataFrame的数据结构返回
     :param data_path:
     :param data_name:
     :return:
-    '''
+    """
     try:
         # 获取用户+评论数据
         user_data_path = data_path + data_name + '.json'
@@ -32,7 +32,7 @@ def load_comment_from_json(data_name, data_path='./data/'):
         # traceback.print_exc()
         print('加载用户评论数据失败')
         return 0
-    data_path = './data_analysis/'
+    data_path = './data_analysis/' + data_name + '/'
     if not path.exists(data_path):
             os.makedirs(data_path)
     return datadf
@@ -51,12 +51,12 @@ def load_comment_data(data_name, data_path='./data/'):
 
 
 def level_pie(data_name):
-    '''
+    """
         输出用户等级的饼图
         :param data_name:
         :param datadf:
-        :return:        
-    '''
+        :return:
+    """
     global datadf, text
     try:        
         data_dict = {'小于4级': 0, '4级': 0, '5级': 0, '6级': 0}
@@ -72,14 +72,14 @@ def level_pie(data_name):
 
         explode = (0, 0, 0, 0.03)
         plt.pie(data_dict.values(), explode=explode, labels=tuple(data_dict.keys()),
-                autopct='%.1f%%', labeldistance=0.8, shadow=True, startangle=90,
+                autopct='%.1f%%', labeldistance=0.8, startangle=90,
                 colors=('#22a2c3', '#eba0b3', '#83cbac', '#894276'))  # TODO 颜色
         plt.axis('equal')  # 让图像保持圆形
         plt.legend(loc="upper right", fontsize=13, bbox_to_anchor=(1.1, 1.05), borderaxespad=0.3)
         plt.title('Level Analysis')
-        save_path = "./data_analysis/level_pie_" + data_name + ".jpg"
+        save_path = "./data_analysis/" + data_name + "/level_pie_" + data_name + ".jpg"
         plt.savefig(save_path, dpi=600)
-        save_path = os.getcwd() + save_path[1:]
+        # save_path = os.getcwd() + save_path[1:]
         # os.startfile(save_path)
         plt.show()
     except:
@@ -87,12 +87,12 @@ def level_pie(data_name):
 
 
 def member_pie(data_name):
-    '''
+    """
         输出会员构成的饼图
         :param data_name:
         :param datadf:
         :return:
-    '''
+    """
     global datadf, text
     try:
         data_dict = {'普通会员': 0, '月大会员': 0, '年大会员': 0}
@@ -106,17 +106,17 @@ def member_pie(data_name):
 
         explode = (0, 0, 0.03)
         plt.pie(data_dict.values(), explode=explode, labels=tuple(data_dict.keys()),
-                autopct='%.1f%%', labeldistance=0.8, shadow=True, startangle=90,
+                autopct='%.1f%%', labeldistance=0.8, startangle=90,
                 colors=('#22a2c3', '#eba0b3', '#83cbac'))   # TODO 颜色
         plt.axis('equal')  # 让图像保持圆形
         plt.legend(loc="upper right", fontsize=13, bbox_to_anchor=(1.1, 1.05), borderaxespad=0.3)
         plt.title('Member Analysis')
-        save_path = "./data_analysis/Member_pie_" + data_name + ".jpg"
+        save_path = "./data_analysis/" + data_name + "/Member_pie_" + data_name + ".jpg"
         plt.savefig(save_path, dpi=600)
-        save_path = os.getcwd() + save_path[1:]
+        # save_path = os.getcwd() + save_path[1:]
         # os.startfile(save_path)
         plt.show()
-        print('会员分析饼图已保存：./data_analysis/Member_pie_' + data_name + '.jpg')
+        print('会员分析饼图已保存：./data_analysis/' + data_name + '/Member_pie_' + data_name + '.jpg')
     except:
         traceback.print_exc()
 
@@ -135,7 +135,7 @@ def gender_pie(data_name):
             data_dict[i] += 1
         explode = (0, 0, 0.03)
         plt.pie(data_dict.values(), explode=explode, labels=tuple(data_dict.keys()),
-                autopct='%.1f%%', labeldistance=0.8, shadow=True, startangle=90,
+                autopct='%.1f%%', labeldistance=0.8, startangle=90,
                 colors=('#22a2c3', '#eba0b3', '#83cbac'))
         # labeldistance，文本的位置离远点有多远，1.1指1.1倍半径的位置
         # autopct，圆里面的文本格式，%3.1f%%表示小数有三位，整数有一位的浮点数
@@ -157,12 +157,12 @@ def gender_pie(data_name):
 
         plt.title('Gender Analysis')
         #  plt.savefig("./data_analysis/Gender_pie.jpg", dpi=600)
-        save_path = "./data_analysis/Gender_pie_" + data_name + ".jpg"
+        save_path = "./data_analysis/" + data_name + "/Gender_pie_" + data_name + ".jpg"
         plt.savefig(save_path, dpi=600)
-        save_path = os.getcwd() + save_path[1:]
+        # save_path = os.getcwd() + save_path[1:]
         # os.startfile(save_path)
         plt.show()
-        print('性别分析饼图已保存：./data_analysis/Gender_pie_' + data_name + '.jpg')
+        print('性别分析饼图已保存：./data_analysis/' + data_name + '/Gender_pie_' + data_name + '.jpg')
     except:
         traceback.print_exc()
 
@@ -192,15 +192,17 @@ def ctime_analysis_based_day(data_name):
         xtick_spacing = int(length/13) + 1
         ax.xaxis.set_major_locator(ticker.MultipleLocator(xtick_spacing))
         ytick_spacing = int(round(max(data_dict.values())/150)*10)+10
+        if ytick_spacing < 11:
+            ytick_spacing = 1
         ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_spacing))
 
         ax.set_title("Comment Time Analysis Based Day")
-        save_path = "./data_analysis/CTime(day)_line_chart_" + data_name + ".jpg"
+        save_path = "./data_analysis/" + data_name + "/CTime(day)_line_chart_" + data_name + ".jpg"
         plt.savefig(save_path, dpi=600)
         save_path = os.getcwd() + save_path[1:]
         # os.startfile(save_path)
         plt.show()
-        print('评论时间(day)分析折线图已保存：./data_analysis/CTime(day)_line_chart_' + data_name + '.jpg')
+        print('评论时间(day)分析折线图已保存：./data_analysis/' + data_name + '/CTime(day)_line_chart_' + data_name + '.jpg')
     except:
         traceback.print_exc()
 
@@ -229,12 +231,12 @@ def ctime_analysis_based_hour(data_name):
         ax.set_title("Comment Time Analysis Based Hour")
         ytick_spacing = int(round(max(data_dict.values())/150)*10)+10
         ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_spacing))
-        save_path = "./data_analysis/CTime(hour)_line_chart_" + data_name + ".jpg"
+        save_path = "./data_analysis/" + data_name + "/CTime(hour)_line_chart_" + data_name + ".jpg"
         plt.savefig(save_path, dpi=600)
         save_path = os.getcwd() + save_path[1:]
         # os.startfile(save_path)
         plt.show()
-        print('评论时间(hour)分析折线图已保存：./data_analysis/CTime(hour)_line_chart_' + data_name + '.jpg')
+        print('评论时间(hour)分析折线图已保存：./data_analysis/' + data_name + '/CTime(hour)_line_chart_' + data_name + '.jpg')
     except:
         traceback.print_exc()
 
@@ -263,8 +265,8 @@ def wordcloud_comment(data_name):
     # 开始词云分析
     global datadf, text
     try:
-        dict_path = './data/dict/worddict.txt'
-        stopword_path = './data/dict/stopwords.txt'
+        dict_path = './dict/worddict.txt'
+        stopword_path = './dict/stopwords.txt'
 
         jieba.load_userdict(dict_path)      # 加载用户自定义字典
         with open(stopword_path, 'r', encoding='utf-8') as f:   # 加载用户自定义的暂停词
@@ -280,12 +282,12 @@ def wordcloud_comment(data_name):
         word.generate(text)
         plt.imshow(word, interpolation='bilinear')
         plt.axis('off')  # 关闭坐标轴
-        save_path = "./data_analysis/wordcloud_" + data_name + ".jpg"
+        save_path = "./data_analysis/" + data_name + "/wordcloud_" + data_name + ".jpg"
         plt.savefig(save_path, dpi=600)
         save_path = os.getcwd() + save_path[1:]
         # os.startfile(save_path)
         plt.show()
-        print('评论词云图已保存：./data_analysis/wordcloud_' + data_name + '.jpg')
+        print("评论词云图已保存：./data_analysis/" + data_name + "/wordcloud_" + data_name + ".jpg")
     except:
         traceback.print_exc()
 

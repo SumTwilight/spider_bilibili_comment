@@ -8,7 +8,7 @@ import os
 from os import path
 from PyQt5.QtCore import QThread, pyqtSignal
 
-FAILED_SPIDER = 0   # TODO 等待自己定义一个常量类
+FAILED_SPIDER = 0  # TODO 等待自己定义一个常量类
 FAILED_SAVING = -1
 OVERFLOW_ERROR = -2
 
@@ -29,23 +29,23 @@ class SpiderThread(QThread):
     img = ''
     headers = {
         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                      'Chrome/68.0.3440.106 Safari/537.36',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+        'Referer': 'https://www.bilibili.com/video/av51259023'
     }
 
     def __init__(self):
         super(SpiderThread, self).__init__()
 
     def get_html_text(self, URL, code='utf-8'):
-        '''
+        """
         通过指定url链接获取html页面，编码方法默认为utf-8。有简单的错误处理，但不会提示。
 
         :param URL: 指定URL
         :param code: 默认为'utf-8'
         :return: 返回相应的html页面信息
-        '''
+        """
         try:
-            r = requests.get(URL, self.headers, timeout=30)
+            r = requests.get(URL, headers=self.headers, timeout=30)
             r.raise_for_status()
             r.encoding = code
             return r.text
@@ -55,12 +55,12 @@ class SpiderThread(QThread):
             return FAILED_SPIDER
 
     def get_comment_info(self, oid, pn):
-        '''
+        """
         核心函数，爬取用户评论及相关数据并整理，使用DataFrame数据类型返回最终数据
         :param oid:视频id
         :param pn:评论页数
         :return:
-        '''
+        """
         start_url = 'https://api.bilibili.com/x/v2/reply?type=1&pn={}&oid=' + oid
         # 遍历爬取pn页评论
         dict_comment = {}
@@ -115,8 +115,8 @@ class SpiderThread(QThread):
         user_comment_data = pd.DataFrame(dict_comment).T  # 转置一下
         return user_comment_data
 
-    def save_commment_to_json(self, datadf, data_name, img, data_path='./data/'):
-        '''
+    def save_comment_to_json(self, datadf, data_name, img, data_path='./data/'):
+        """
         1）将数据datadf转为json文件后以data_name为名称存储到data_path路径下
         2）从datadf中提取出评论信息以data_name为名称存储到'./data/comment_data/'路径下
         3）将对应的图片img以data_name为名称存储到'./data/image/'路径下
@@ -125,7 +125,7 @@ class SpiderThread(QThread):
         :param img:
         :param data_path: 文件存储的路径    ex : ./data/
         :return:
-        '''
+        """
         # path = ./data/total_comment.json
         self.log_signal.emit('爬取完成，保存数据中.....')
         try:
@@ -138,6 +138,7 @@ class SpiderThread(QThread):
                 file_data.write(datadf_json)
             self.log_signal.emit('评论用户数据已保存在：' + data_path)
         except:
+            traceback.print_exc()
             self.log_signal.emit('json信息写入出错。')
             return FAILED_SAVING
 
@@ -153,6 +154,7 @@ class SpiderThread(QThread):
                     file_data.write('\n')
             self.log_signal.emit('评论数据已保存在：' + data_path)
         except:
+            traceback.print_exc()
             self.log_signal.emit('评论数据写入出错。')
             return FAILED_SAVING
 
@@ -209,13 +211,20 @@ class SpiderThread(QThread):
             self.oid = re.findall(r'av\d+|正片".{1,120}"aid":\d+', start_html)[0]
             self.oid = re.findall(r'av\d+|"aid":\d+', self.oid)[0]
             self.oid = re.findall(r'\d+', self.oid)[0]
+            self.log_signal.emit('视频id：' + self.oid)
             # 得到视频的Name
-            self.Av_name = re.findall(r'<title>[\u4e00-\u9fa5|\d| |\w|·]+', start_html)[0][7:]
+            self.Av_name = re.findall(r'<title>[\u4e00-\u9fa5|\d| |\w|·|，|【|】|,|\[|\]|!]+'
+                                      r'|name="title" content=".+bilibili'
+                                      , start_html)[0][:100]
+            if self.Av_name[0:7] == '<title>':
+                self.Av_name = self.Av_name[7:]
+            else:
+                self.Av_name = re.findall(r't=".+bilibili', self.Av_name)[0][3:-26]
             self.log_signal.emit('视频名称：' + self.Av_name)
             # 得到视频的图片
             self.img = re.findall(r'og:image".+g">', start_html)[0]
-            self.img = re.findall(r'https.+g', self.img)[0]
-            self.img = requests.get(self.img).content     # TODO 图片暂时还没用
+            self.img = re.findall(r'http.+g', self.img)[0]
+            self.img = requests.get(self.img).content  # TODO 图片暂时还没用
             # 得到视频评论总页数pn
             pn1_url = 'https://api.bilibili.com/x/v2/reply?type=1&pn=1&oid=' + self.oid
             pn1_html = self.get_html_text(pn1_url)
@@ -238,7 +247,7 @@ class SpiderThread(QThread):
             if int(self.spider_pn) <= int(self.count_pn):
                 user_comment_data = self.get_comment_info(self.oid, int(self.spider_pn))  # int(pn)
             else:
-                error_signal.emit(1)        # 页数上溢
+                error_signal.emit(1)  # 页数上溢
                 return OVERFLOW_ERROR
         except:
             traceback.print_exc()
@@ -246,7 +255,7 @@ class SpiderThread(QThread):
             return FAILED_SPIDER
 
         try:
-            self.save_commment_to_json(user_comment_data, self.Av_name, self.img)
+            self.save_comment_to_json(user_comment_data, self.Av_name, self.img)
         except:
             # traceback.print_exc()
             self.log_signal.emit('400：保存爬取数据失败')
@@ -256,7 +265,7 @@ class SpiderThread(QThread):
     def run(self):
         flag = self.main_spider()
 
-        if flag == FAILED_SPIDER:    # 在log中打印 爬虫失败
+        if flag == FAILED_SPIDER:  # 在log中打印 爬虫失败
             self.log_signal.emit('状态码返回错误：爬虫失败')
         elif flag == FAILED_SAVING:  # 在log中打印 保存失败
             self.log_signal.emit('状态码返回错误：保存失败')
@@ -264,7 +273,7 @@ class SpiderThread(QThread):
             pass
         else:
             self.finished_signal.emit()
-            self.log_signal.emit('视频名称：'+str(self.Av_name)+'\n爬取成功')      # 在log中打印 爬虫成功
+            self.log_signal.emit('视频名称：' + str(self.Av_name) + '\n爬取成功')  # 在log中打印 爬虫成功
 
 
 if __name__ == '__main__':

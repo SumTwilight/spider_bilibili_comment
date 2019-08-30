@@ -1,9 +1,7 @@
 import os
 import sys
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-import matplotlib.pyplot as plt
-
+import ctypes
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myappid")
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QComboBox, QTextBrowser, QTableWidget, QInputDialog, \
     QTableWidgetItem, QHeaderView, QProgressBar, QHBoxLayout, QVBoxLayout, QLineEdit
@@ -16,9 +14,9 @@ class CrawIWindow(QWidget):
     # 添加控件
     def __init__(self):
         super(CrawIWindow, self).__init__()
-        self.resize(1000, 1600)
-        self.setWindowTitle('这里是标题')
-        self.setWindowIcon(QIcon('./data/image/全职高手 第一季.jpg'))  # 设置窗口图标
+        self.resize(800, 1000)
+        self.setWindowTitle('b站视频评论爬取小工具')
+        self.setWindowIcon(QIcon('./icon.png'))  # 设置窗口图标
 
         # 生成各个部件
         self.start_btn = QPushButton(self)
@@ -257,33 +255,33 @@ class CrawIWindow(QWidget):
 
         elif btn == self.gender_pie_btn:
             danalysis.gender_pie(self.spider_thread.Av_name)
-            self.set_log_slot("生成成功\n图片已保存在./data_analysis/Gender_pie_"
-                              + self.spider_thread.Av_name + ".jpg")
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/" + self.spider_thread.Av_name +
+                              "/Gender_pie_" + self.spider_thread.Av_name + ".jpg")
 
         elif btn == self.member_pie_btn:
             danalysis.member_pie(self.spider_thread.Av_name)
-            self.set_log_slot("生成成功\n图片已保存在./data_analysis/Member_pie_"
-                              + self.spider_thread.Av_name + ".jpg")
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/" + self.spider_thread.Av_name +
+                              "/Member_pie_" + self.spider_thread.Av_name + ".jpg")
 
         elif btn == self.level_pie_btn:
             danalysis.level_pie(self.spider_thread.Av_name)
-            self.set_log_slot("生成成功\n图片已保存在./data_analysis/level_pie"
-                              + self.spider_thread.Av_name + ".jpg")
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/" + self.spider_thread.Av_name +
+                              "/level_pie" + self.spider_thread.Av_name + ".jpg")
 
         elif btn == self.ctime_day_line_btn:
             danalysis.ctime_analysis_based_day(self.spider_thread.Av_name)
-            self.set_log_slot("生成成功\n图片已保存在./data_analysis/CTime(day)_line_chart_"
-                              + self.spider_thread.Av_name + ".jpg")
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/" + self.spider_thread.Av_name +
+                              "/CTime(day)_line_chart_" + self.spider_thread.Av_name + ".jpg")
 
         elif btn == self.ctime_hour_line_btn:
             danalysis.ctime_analysis_based_hour(self.spider_thread.Av_name)
-            self.set_log_slot("生成成功\n图片已保存在./data_analysis/CTime(hour)_line_chart_"
-                              + self.spider_thread.Av_name + ".jpg")
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/" + self.spider_thread.Av_name +
+                              "/CTime(hour)_line_chart_" + self.spider_thread.Av_name + ".jpg")
 
         elif btn == self.wordcloud_btn:
             danalysis.wordcloud_comment(self.spider_thread.Av_name)
-            self.set_log_slot("生成成功\n图片已保存在./data_analysis/wordcloud_"
-                              + self.spider_thread.Av_name + ".jpg")
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/" + self.spider_thread.Av_name +
+                              "/wordcloud_" + self.spider_thread.Av_name + ".jpg")
 
 
 if __name__ == '__main__':

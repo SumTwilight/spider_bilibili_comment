@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QComboBox, QTextBrowser, QTableWidget, QInputDialog, \
-                            QTableWidgetItem, QHeaderView, QProgressBar, QHBoxLayout, QVBoxLayout, QLineEdit
+    QTableWidgetItem, QHeaderView, QProgressBar, QHBoxLayout, QVBoxLayout, QLineEdit
 from PyQt5.QtCore import QThread, pyqtSignal
 import spider_bilibili_comment as spbili
 import data_analysis as danalysis
@@ -18,7 +18,7 @@ class CrawIWindow(QWidget):
         super(CrawIWindow, self).__init__()
         self.resize(1000, 1600)
         self.setWindowTitle('这里是标题')
-        self.setWindowIcon(QIcon('./data/image/全职高手 第一季.jpg'))      # 设置窗口图标
+        self.setWindowIcon(QIcon('./data/image/全职高手 第一季.jpg'))  # 设置窗口图标
 
         # 生成各个部件
         self.start_btn = QPushButton(self)
@@ -155,11 +155,11 @@ class CrawIWindow(QWidget):
         self.setLayout(self.v_layout)
 
     def crawl_init(self):
-        self.spider_thread.finished_signal.connect(self.finish_slot)     # 爬取完成信号
-        self.spider_thread.log_signal.connect(self.set_log_slot)     # 日志打印信号
-        self.spider_thread.result_signal.connect(self.set_table_slot)    # 用户评论信息打印信号
-        self.spider_thread.progressbar_signal.connect(self.set_progressbar_slot)   # 进度条信号
-        self.spider_thread.error_signal.connect(self.error_slot)     # 报错信号
+        self.spider_thread.finished_signal.connect(self.finish_slot)  # 爬取完成信号
+        self.spider_thread.log_signal.connect(self.set_log_slot)  # 日志打印信号
+        self.spider_thread.result_signal.connect(self.set_table_slot)  # 用户评论信息打印信号
+        self.spider_thread.progressbar_signal.connect(self.set_progressbar_slot)  # 进度条信号
+        self.spider_thread.error_signal.connect(self.error_slot)  # 报错信号
 
     def finish_slot(self):
         self.set_av_link_btn.setEnabled(True)
@@ -174,7 +174,7 @@ class CrawIWindow(QWidget):
 
     def set_table_slot(self, dict_data):
         row = self.table.rowCount()  # 获取当前行数
-        self.table.insertRow(row)    # 插入新的一行
+        self.table.insertRow(row)  # 插入新的一行
 
         self.table.setItem(row, 0, QTableWidgetItem(str(dict_data['mid'])))
         self.table.setItem(row, 1, QTableWidgetItem(dict_data['uname']))
@@ -187,7 +187,7 @@ class CrawIWindow(QWidget):
         self.table.setItem(row, 7, QTableWidgetItem(dict_data['message']))  # TODO 格子太小，需要调整
 
     def set_progressbar_slot(self, i, pn):
-        k = int((float(i)/pn)*100)
+        k = int((float(i) / pn) * 100)
         self.progressbar.setValue(k)
 
     def error_slot(self, error):
@@ -239,7 +239,7 @@ class CrawIWindow(QWidget):
             self.stop_btn.setEnabled(False)
             self.start_btn.setEnabled(False)
 
-            self.spider_thread.terminate()   # 停止爬取进程
+            self.spider_thread.terminate()  # 停止爬取进程
         elif btn == self.open_save_dir_btn:
             os.system('explorer.exe /n,.\\data')
 
@@ -247,26 +247,43 @@ class CrawIWindow(QWidget):
         # TODO
         if btn == self.start_data_analysis_btn:
             danalysis.load_data(self.spider_thread.Av_name)
+            self.set_log_slot('读取数据成功')
             self.gender_pie_btn.setEnabled(True)
             self.member_pie_btn.setEnabled(True)
             self.level_pie_btn.setEnabled(True)
             self.ctime_day_line_btn.setEnabled(True)
             self.ctime_hour_line_btn.setEnabled(True)
             self.wordcloud_btn.setEnabled(True)
-            pass
+
         elif btn == self.gender_pie_btn:
-            danalysis.gender_pie(self.spider_thread.Av_name, danalysis.datadf)
+            danalysis.gender_pie(self.spider_thread.Av_name)
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/Gender_pie_"
+                              + self.spider_thread.Av_name + ".jpg")
+
         elif btn == self.member_pie_btn:
-            danalysis.member_pie(self.spider_thread.Av_name, danalysis.datadf)
+            danalysis.member_pie(self.spider_thread.Av_name)
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/Member_pie_"
+                              + self.spider_thread.Av_name + ".jpg")
+
         elif btn == self.level_pie_btn:
-            danalysis.level_pie(self.spider_thread.Av_name, danalysis.datadf)
+            danalysis.level_pie(self.spider_thread.Av_name)
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/level_pie"
+                              + self.spider_thread.Av_name + ".jpg")
+
         elif btn == self.ctime_day_line_btn:
-            danalysis.ctime_analysis_based_day(self.spider_thread.Av_name, danalysis.datadf)
+            danalysis.ctime_analysis_based_day(self.spider_thread.Av_name)
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/CTime(day)_line_chart_"
+                              + self.spider_thread.Av_name + ".jpg")
+
         elif btn == self.ctime_hour_line_btn:
-            danalysis.ctime_analysis_based_hour(self.spider_thread.Av_name, danalysis.datadf)
+            danalysis.ctime_analysis_based_hour(self.spider_thread.Av_name)
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/CTime(hour)_line_chart_"
+                              + self.spider_thread.Av_name + ".jpg")
+
         elif btn == self.wordcloud_btn:
-            danalysis.wordcloud_comment(self.spider_thread.Av_name, danalysis.text)
-            pass
+            danalysis.wordcloud_comment(self.spider_thread.Av_name)
+            self.set_log_slot("生成成功\n图片已保存在./data_analysis/wordcloud_"
+                              + self.spider_thread.Av_name + ".jpg")
 
 
 if __name__ == '__main__':

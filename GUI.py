@@ -1,12 +1,14 @@
-import sys, os
+import os
+import sys
+
 if hasattr(sys, 'frozen'):
     os.environ['PATH'] = sys._MEIPASS + ";" + os.environ['PATH']
 import ctypes
+
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myappid")
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QComboBox, QTextBrowser, QTableWidget, QInputDialog, \
-    QTableWidgetItem, QHeaderView, QProgressBar, QHBoxLayout, QVBoxLayout, QLineEdit
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QTextBrowser, QTableWidget, QTableWidgetItem, \
+    QHeaderView, QProgressBar, QHBoxLayout, QVBoxLayout, QLineEdit
 import spider_bilibili_comment as spbili
 import data_analysis as danalysis
 
@@ -243,7 +245,7 @@ class CrawIWindow(QWidget):
             os.system('explorer.exe /n,.\\data')
 
     def data_btn_slot(self, btn):
-        # TODO
+        # TODO  我也忘了为什么加这个TODO了
         if btn == self.start_data_analysis_btn:
             danalysis.load_data(self.spider_thread.Av_name)
             self.set_log_slot('读取数据成功')

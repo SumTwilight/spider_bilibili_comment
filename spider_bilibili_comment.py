@@ -19,7 +19,7 @@ def get_html_text(url, headers, code='utf-8'):
     :return: 返回相应的html页面信息
     '''
     try:
-        r = requests.get(url, headers, timeout=30)
+        r = requests.get(url, headers=headers, timeout=30)
         r.raise_for_status()
         r.encoding = code
         return r.text
@@ -225,5 +225,5 @@ def main_spider(url):
 
 
 if __name__ == '__main__':
-    url = 'Waiting For Input'
+    url = input('Waiting For Input url')
     main_spider(url)

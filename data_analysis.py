@@ -10,7 +10,6 @@ import jieba
 from PIL import Image
 import numpy as np
 
-
 plt.rcParams['font.sans-serif'] = ['simhei']  # 用来正常显示中文标签
 plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 datadf = pd.DataFrame()
@@ -34,7 +33,7 @@ def load_comment_from_json(data_name, data_path='./data/'):
         return 0
     data_path = './data_analysis/' + data_name + '/'
     if not path.exists(data_path):
-            os.makedirs(data_path)
+        os.makedirs(data_path)
     return datadf
 
 
@@ -54,11 +53,10 @@ def level_pie(data_name):
     """
         输出用户等级的饼图
         :param data_name:
-        :param datadf:
         :return:
     """
     global datadf, text
-    try:        
+    try:
         data_dict = {'小于4级': 0, '4级': 0, '5级': 0, '6级': 0}
         for i in datadf['current_level']:
             if i < 4:
@@ -90,7 +88,6 @@ def member_pie(data_name):
     """
         输出会员构成的饼图
         :param data_name:
-        :param datadf:
         :return:
     """
     global datadf, text
@@ -107,7 +104,7 @@ def member_pie(data_name):
         explode = (0, 0, 0.03)
         plt.pie(data_dict.values(), explode=explode, labels=tuple(data_dict.keys()),
                 autopct='%.1f%%', labeldistance=0.8, startangle=90,
-                colors=('#22a2c3', '#eba0b3', '#83cbac'))   # TODO 颜色
+                colors=('#22a2c3', '#eba0b3', '#83cbac'))  # TODO 颜色
         plt.axis('equal')  # 让图像保持圆形
         plt.legend(loc="upper right", fontsize=13, bbox_to_anchor=(1.1, 1.05), borderaxespad=0.3)
         plt.title('Member Analysis')
@@ -125,7 +122,6 @@ def gender_pie(data_name):
     '''
     输出男女性别的饼图
     :param data_name:
-    :param datadf:
     :return:
     '''
     global datadf, text
@@ -196,20 +192,20 @@ def ctime_analysis_based_day(data_name):
         # 通过这四句话来控制 x，y轴的密度  ticker.MultipleLocater()给出的数字明确控制刻度线间距，允许自动限制确
         length = len(data_dict)
         # 设置 x 密度
-        xtick_spacing = int(length/13) + 1
+        xtick_spacing = int(length / 13) + 1
         ax.xaxis.set_major_locator(ticker.MultipleLocator(xtick_spacing))
-        ytick_spacing = int(round(max(data_dict.values())/150)*10)+10
+        ytick_spacing = int(round(max(data_dict.values()) / 150) * 10) + 10
         if ytick_spacing < 11:
             ytick_spacing = 1
         ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_spacing))
 
         ax.set_title("Comment Time Analysis Based Day")
-        plt.xlabel('时间（日）',fontproperties='SimHei',fontsize=15)
-        plt.ylabel('评论数',fontproperties='SimHei',fontsize=15)
+        plt.xlabel('时间（日）', fontproperties='SimHei', fontsize=15)
+        plt.ylabel('评论数', fontproperties='SimHei', fontsize=15)
 
         save_path = "./data_analysis/" + data_name + "/CTime(day)_line_chart_" + data_name + ".jpg"
         plt.savefig(save_path, dpi=600)
-        save_path = os.getcwd() + save_path[1:]
+        # save_path = os.getcwd() + save_path[1:]
         # os.startfile(save_path)
         plt.show()
         print('评论时间(day)分析折线图已保存：./data_analysis/' + data_name + '/CTime(day)_line_chart_' + data_name + '.jpg')
@@ -221,7 +217,6 @@ def ctime_analysis_based_hour(data_name):
     '''
     输出以小时为单位的评论数的折线图
     :param data_name:
-    :param datadf:
     :return:
     '''
     global datadf, text
@@ -241,16 +236,16 @@ def ctime_analysis_based_hour(data_name):
         ax.plot(li_x, li_y)
         # TODO 修改曲线的颜色类型
         ax.set_title("Comment Time Analysis Based Hour")
-        plt.xlabel('时间（小时）',fontproperties='SimHei',fontsize=15)
-        plt.ylabel('评论数',fontproperties='SimHei',fontsize=15)
-        
-        ytick_spacing = int(round(max(data_dict.values())/150)*10)+10
+        plt.xlabel('时间（小时）', fontproperties='SimHei', fontsize=15)
+        plt.ylabel('评论数', fontproperties='SimHei', fontsize=15)
+
+        ytick_spacing = int(round(max(data_dict.values()) / 150) * 10) + 10
         if ytick_spacing < 11:
             ytick_spacing = 1
         ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_spacing))
         save_path = "./data_analysis/" + data_name + "/CTime(hour)_line_chart_" + data_name + ".jpg"
         plt.savefig(save_path, dpi=600)
-        save_path = os.getcwd() + save_path[1:]
+        # save_path = os.getcwd() + save_path[1:]
         # os.startfile(save_path)
         plt.show()
         print('评论时间(hour)分析折线图已保存：./data_analysis/' + data_name + '/CTime(hour)_line_chart_' + data_name + '.jpg')
@@ -276,7 +271,6 @@ def wordcloud_comment(data_name):
     '''
     评论数据 词云分析
     :param data_name:
-    :param text
     :return:
     '''
     # 开始词云分析
@@ -285,12 +279,12 @@ def wordcloud_comment(data_name):
         dict_path = './wordcloud_dict/worddict.txt'
         stopword_path = './wordcloud_dict/stopwords.txt'
 
-        jieba.load_userdict(dict_path)      # 加载用户自定义字典
-        with open(stopword_path, 'r', encoding='utf-8') as f:   # 加载用户自定义的暂停词
+        jieba.load_userdict(dict_path)  # 加载用户自定义字典
+        with open(stopword_path, 'r', encoding='utf-8') as f:  # 加载用户自定义的暂停词
             stoptext = f.read()
         stoplist = stoptext.rsplit(sep="\n")
-        text = stopword_cut(text, stoplist)         # 根据暂停词来去掉没用的数据
-        text = ' '.join(text)   # 将list变为字符串
+        text = stopword_cut(text, stoplist)  # 根据暂停词来去掉没用的数据
+        text = ' '.join(text)  # 将list变为字符串
         # # 设置云图的遮蔽图片
         # mask_img_path = './data/image/' + data_name + '.png'
         # mask_img = np.array(Image.open(mask_img_path))
@@ -301,7 +295,7 @@ def wordcloud_comment(data_name):
         plt.axis('off')  # 关闭坐标轴
         save_path = "./data_analysis/" + data_name + "/wordcloud_" + data_name + ".jpg"
         plt.savefig(save_path, dpi=600)
-        save_path = os.getcwd() + save_path[1:]
+        # save_path = os.getcwd() + save_path[1:]
         # os.startfile(save_path)
         plt.show()
         print("评论词云图已保存：./data_analysis/" + data_name + "/wordcloud_" + data_name + ".jpg")

@@ -203,7 +203,7 @@ class CrawIWindow(QWidget):
         if btn == self.set_av_link_btn:
             self.log_browser.clear()  # 清除之前日志
             self.spider_thread.URL = self.av_link_line.text()
-            self.spider_thread.get_av_info()  # 获取视频信息
+            self.spider_thread.get_av_info  # 获取视频信息
             self.set_av_pn_btn.setEnabled(True)
             self.stop_btn.setEnabled(True)
 

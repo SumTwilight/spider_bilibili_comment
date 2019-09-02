@@ -29,7 +29,8 @@ class SpiderThread(QThread):
     img = ''
     headers = {
         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/67.0.3396.99 Safari/537.36',
         'Referer': 'https://www.bilibili.com/video/av51259023'
     }
 
@@ -197,9 +198,10 @@ class SpiderThread(QThread):
         data = pd.read_json(data_path, orient='index', encoding='utf-8')
         return data
 
+    @property
     def get_av_info(self):
         try:
-            start_html = self.get_html_text(self.URL, self.headers)
+            start_html = self.get_html_text(self.URL)
             # with open('./start.html', 'w', encoding='utf-8') as f:
             #     f.write(start_html)
         except:
@@ -240,7 +242,6 @@ class SpiderThread(QThread):
 
     def main_spider(self):
         '''
-        :param URL:
         :return:
         '''
         try:

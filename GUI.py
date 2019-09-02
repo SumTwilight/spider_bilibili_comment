@@ -1,5 +1,6 @@
-import os
-import sys
+import sys, os
+if hasattr(sys, 'frozen'):
+    os.environ['PATH'] = sys._MEIPASS + ";" + os.environ['PATH']
 import ctypes
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myappid")
 from PyQt5.QtGui import QIcon

@@ -230,6 +230,8 @@ def ctime_analysis_based_hour(data_name):
         # TODO 修改曲线的颜色类型
         ax.set_title("Comment Time Analysis Based Hour")
         ytick_spacing = int(round(max(data_dict.values())/150)*10)+10
+        if ytick_spacing < 11:
+            ytick_spacing = 1
         ax.yaxis.set_major_locator(ticker.MultipleLocator(ytick_spacing))
         save_path = "./data_analysis/" + data_name + "/CTime(hour)_line_chart_" + data_name + ".jpg"
         plt.savefig(save_path, dpi=600)

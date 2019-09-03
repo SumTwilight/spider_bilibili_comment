@@ -9,7 +9,7 @@ def main():
     # url = 'https://www.bilibili.com/bangumi/play/ss28296'  # 哈利波特
     # url = 'https://www.bilibili.com/bangumi/play/ss12717/'          # 扫毒
     # url = 'https://www.bilibili.com/video/av63897667'
-    # url ='https://www.bilibili.com/video/av28547786'
+    # url = 'https://www.bilibili.com/video/av28547786'
     # url = 'https://www.bilibili.com/bangumi/play/ss5978'      # 博人传  爬取失败，没有avid
     # url = 'https://www.bilibili.com/bangumi/play/ss28016'     # 女高中生的虚度日常_番剧_bilibili_哔哩哔哩
     # url = 'https://www.bilibili.com/bangumi/play/ep71958'       # 某科学的超电磁炮
